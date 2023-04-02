@@ -1,4 +1,16 @@
+# Group Members
+Team members:
+
+- Augusto Fonseca - 225984@students.hertie-school.org
+
+- Danial Riaz - 201678@students.hertie-school.org
+
+- Fernando Corral - 222836@students.hertie-school.org
+
+- Rodrigo Dornelles - 228446@students.hertie-school.org
+
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-8d59dc4de5201274e310e4c54b9627a8934c3b88527886e3b421487c677d23eb.svg)](https://classroom.github.com/a/f4MOD0El)
+
 # BinaryTree
 
 Clone the Github template and add the four traversal methods to the LinkedBinaryTree.

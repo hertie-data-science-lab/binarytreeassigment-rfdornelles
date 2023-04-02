@@ -12,13 +12,13 @@ class LinkedBinaryTree(BinaryTree):
 
     class _Node:
         __slots__ = '_element', '_parent', '_left', '_right'
-
+        
+        # sets the fundamental parameters of the node
         def __init__(self, element, parent=None, left=None, right=None):
             self._element = element
             self._parent = parent
             self._left = left
             self._right = right
-
     
     class Position(BinaryTree.Position):
         """An abstraction representing the location of a single element."""
@@ -31,7 +31,6 @@ class LinkedBinaryTree(BinaryTree):
         def element(self):
             return self._node._element
 
-        
         def __eq__(self, other):
             return type(other) is type(self) and other._node is self._node
 
@@ -92,6 +91,7 @@ class LinkedBinaryTree(BinaryTree):
         """Return the number of children of Position p."""
         node = self._validate(p)
         count = 0
+        # it will increase the number if there's elements on right and/or left
         if node._left is not None:
             count += 1
         if node._right is not None:
@@ -103,12 +103,18 @@ class LinkedBinaryTree(BinaryTree):
 
         Raise ValueError if tree nonempty.
         """
-
-        if self._root is not None: raise ValueError('Root exists')
+        # avoid setting root if there's alredy one
+        if self._root is not None: raise ValueError('Root already exists. Impossible to add another root.')
+        
+        # the start size should be 1
         self._size = 1
+        
+        # seting the givern element e as the root node
         self._root = self._Node(e)
+        # giving its position
         pos = self._make_position(self._root)
         self._positions.append(pos)
+        
         return pos
 
     def _add_left(self, p, e):
@@ -118,12 +124,22 @@ class LinkedBinaryTree(BinaryTree):
         Raise ValueError if Position p is invalidor p already has a left child.
         """
 
+        # calling the validation
         node = self._validate(p)
+        
+        # checks if the is possible to call this method
         if node._right is not None: raise ValueError('Left child exists')
+        
+        # increase the original node size
         self._size += 1
+        
+        # define that the left node will be the element e
         node._left = self._Node(e, node)
+        
+        # update positions
         pos = self._make_position(node._left)
         self._positions.append(pos)
+        
         return pos 
 
     def _add_right(self, p, e):
@@ -132,11 +148,19 @@ class LinkedBinaryTree(BinaryTree):
         Return the Position of new node
         Raise ValueError if Position p is invalid or p already has a right child.
         """
-
+        # calling the validation
         node = self._validate(p)
+        
+        # checks if the is possible to call this method
         if node._right is not None: raise ValueError('Right child exists')
+        
+        # increase the original node size
         self._size += 1
+        
+        # define that the right node will be the element e
         node._right = self._Node(e, node)
+        
+        # update position
         pos = self._make_position(node._right)
         self._positions.append(pos)
         return pos
@@ -144,53 +168,135 @@ class LinkedBinaryTree(BinaryTree):
 
     def _replace(self, p, e):
         """Replace the element at position p with e, and return old element."""
+        
+        # validate the element
         node = self._validate(p)
+        
+        # substitue it in the tree
         old = node._element
         node._element = e
+        
         return old
 
     def _delete(self, p):
-        """Delete the node at Position p, and replace it with its child, if any..git/
+        """Delete the node at Position p, and replace it with its child, if any.
 
         Return the element that had been stored at Position p
         Raise ValueError if Position p is invalid or p has two children.
         """
 
         node = self._validate(p)
+        
+        # checks if is possible to delete the element
         if self.num_children(p) == 2: raise ValueError('p has two children')
+        
         child = node._left if node._left else node._right
+        
+        # elevate as parent if there's no children
         if child is not None:
             child._parent = node._parent
+        
+        # turns into root/child
         if node is self._root:
             self._root = child
         else:
             parent = node._parent
+            
             if node is parent._left:
                 parent._left = child
             else:
                 parent._right = child
         
+        # update positions
         self._positions.remove(p)
         self._size -= 1
         node._parent = node
+        
         return node._element
 
     def _attach(self, p, t1, t2):
         """Attach trees t1 and t2 as left and right subtrees of external p."""
+        
         node = self._validate(p)
+        
         if not self.is_leaf(p): raise ValueError('position must be leaf')
+        
         if not type(self) is type(t1) is type(t2):
             raise TypeError('Tree types must match')
+        
         self._size += len(t1) + len(t2)
+        
         if not t1.is_empty():
             t1._root._parent = node
             node._left = t1._root
             t1._root = None
             t1._size = 0
+            
+            
         if not t2.is_empty():
             t2._root._parent = node
             node._right = t2.root
             t2._root = None
             t2._size = 0
             
+
+    def preorder(self):
+        """Generate a preorder iteration of positions in the tree."""
+        
+        if not self.is_empty():
+            for p in self._subtree_preorder(self.root()):
+                yield p
+
+    def _subtree_preorder(self, p):
+        """Generate a preorder iteration of positions in subtree rooted at p."""
+        
+        yield p  # visit p before its subtrees
+        for c in self.children(p):
+            for other in self._subtree_preorder(c):  # do preorder of c's subtree
+                yield other
+
+
+# Here we introduce the preorder traversal method (root->left->right)
+
+    def preorder_traverse(self, p, depth=0):
+        """Perform a recursive pre-order traversal of the tree."""
+        
+        if p is not None:
+            print(" " * depth + "|--", p.element())
+            
+            if self.left(p) is not None:
+                self.preorder_traverse(self.left(p), depth + 1)
+                
+            if self.right(p) is not None:
+                self.preorder_traverse(self.right(p), depth + 1)
+  
+# Here we introduce the postorder traversal method (left->right->root)
+
+    def postorder_traverse(self, p, depth=0):
+        """Perform a recursive post-order traversal of the tree."""
+        
+        if p is not None:
+            
+            if self.left(p) is not None:
+                self.postorder_traverse(self.left(p), depth + 1)
+                
+            if self.right(p) is not None:
+                self.postorder_traverse(self.right(p), depth + 1)
+                
+            print(" " * depth + "|--", p.element())
+
+# Here we introduce the inorder traversal method (left->root->right)
+
+    def inorder_traverse(self, p, depth=0):
+        """Perform a recursive in-order traversal of the tree."""
+        
+        if p is not None:
+            
+            if self.left(p) is not None:
+                self.inorder_traverse(self.left(p), depth + 1)
+
+            print(" " * depth + "|--", p.element())
+            
+            if self.right(p) is not None:
+                self.inorder_traverse(self.right(p), depth + 1)
 
